@@ -1,0 +1,8 @@
+newmtl Cream_minimalist_ECHOES_label
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+d 1.0
+illum 2
+Ns 10.0
+map_Kd echoes_label_texture.png
