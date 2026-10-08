@@ -1,7 +1,10 @@
-import { story, anatomy, profile, contact } from '../content.js';
+import { story, anatomy, contact } from '../content.js';
+import { PRODUCTS, CATEGORIES, byCategory } from '../data/products.js';
+import { href } from '../router.js';
+import { productCard, esc } from './components.js';
+import { productImage } from './images.js';
 
 const $ = (sel, root = document) => root.querySelector(sel);
-const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
 // content.js'teki verileri DOM'a yazar ve bölümlerin durumunu değiştiren yardımcıları döndürür.
 export function renderContent() {
@@ -55,9 +58,6 @@ export function renderContent() {
     .join('');
   const indexBtns = [...index.querySelectorAll('button')];
 
-  // Koku profili kartları
-  $('[data-cards]').innerHTML = profile.map(cardTemplate).join('');
-
   // Footer
   $('[data-contact]').innerHTML = contact.email
     ? `<li><a href="mailto:${esc(contact.email)}">${esc(contact.email)}</a></li>`
@@ -88,26 +88,32 @@ export function renderContent() {
         if (url) el.innerHTML = `<img src="${url}" alt="" width="160" height="160" />`;
       });
     },
-    setCardVisual(url, alt) {
-      document.querySelectorAll('[data-visual="bottle"]').forEach((el) => {
-        el.innerHTML = `<img src="${url}" alt="${esc(alt)}" />`;
-      });
+    // Ana sayfa koleksiyonu: tüm ürünler (kadın/erkek sırayla) + iki kategori girişi.
+    // Ürün görselleri 3D sahne hazır olduktan sonra üretildiği için ayrı çağrılır.
+    renderCollection() {
+      const women = byCategory('kadin');
+      const men = byCategory('erkek');
+      const mixed = [];
+      for (let i = 0; i < Math.max(women.length, men.length); i++) mixed.push(women[i], men[i]);
+      $('[data-collection]').innerHTML = mixed.filter(Boolean).map((p) => productCard(p)).join('');
+
+      $('[data-cat-tiles]').innerHTML = Object.values(CATEGORIES)
+        .map((c) => {
+          const lead = PRODUCTS.find((p) => p.category === c.id && !p.visual.placeholder) ?? byCategory(c.id)[0];
+          return `
+            <li class="cat-tile cat-tile--${c.id}">
+              <a href="${href.category(c.id)}">
+                <div class="cat-tile__text">
+                  <p class="eyebrow">${byCategory(c.id).length} parfüm</p>
+                  <h3 class="cat-tile__title">${esc(c.title)}</h3>
+                  <p class="cat-tile__intro">${esc(c.intro)}</p>
+                  <span class="cat-tile__cta">Keşfedin <span aria-hidden="true">→</span></span>
+                </div>
+                <img src="${productImage(lead, 520)}" alt="" width="520" height="520" loading="lazy" />
+              </a>
+            </li>`;
+        })
+        .join('');
     },
   };
-}
-
-function cardTemplate(c) {
-  const notes = c.notes ? `<ul class="card__notes">${c.notes.map((n) => `<li>${esc(n)}</li>`).join('')}</ul>` : '';
-  const meter = c.meter != null
-    ? `<div class="card__meter" role="img" aria-label="Yoğunluk: ${Math.round(c.meter * 100)} / 100"><span style="--v:${c.meter}"></span></div>`
-    : '';
-  const visual = c.visual ? `<div class="card__visual" data-visual="${c.visual}"></div>` : '';
-  const sample = c.sample ? '<span class="card__sample">Örnek içerik</span>' : '';
-  return `
-    <li class="card card--${c.tone}">
-      <p class="eyebrow">${esc(c.eyebrow)}</p>
-      <h3 class="card__title">${esc(c.title)}</h3>
-      <p class="card__text">${esc(c.text)}</p>
-      ${notes}${meter}${visual}${sample}
-    </li>`;
 }

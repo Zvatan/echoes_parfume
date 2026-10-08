@@ -1,0 +1,31 @@
+newmtl Glass
+Kd 0.92 0.95 0.98
+Ks 1.0 1.0 1.0
+Ns 250
+d 0.28
+illum 4
+
+newmtl Liquid
+Kd 0.88 0.84 0.70
+Ks 0.3 0.3 0.3
+Ns 80
+d 0.72
+illum 4
+
+newmtl Metal
+Kd 0.08 0.08 0.07
+Ks 0.9 0.9 0.9
+Ns 180
+illum 2
+
+newmtl Label
+Kd 0.95 0.93 0.86
+Ks 0.1 0.1 0.1
+Ns 20
+illum 2
+
+newmtl Ink
+Kd 0.015 0.015 0.012
+Ks 0.1 0.1 0.1
+Ns 30
+illum 2

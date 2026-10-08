@@ -32,10 +32,11 @@ export function initChoreography({ scene, ui, reducedMotion, scrollTo }) {
     end: () => `+=${vh() * (steps.length - 1) * 0.9}`,
     pin: true,
   });
-  const exit = ScrollTrigger.create({ trigger: '.profile', start: 'top bottom', end: 'top top' });
+  const exit = ScrollTrigger.create({ trigger: '.collection', start: 'top bottom', end: 'top top' });
   const outro = ScrollTrigger.create({ trigger: '.outro', start: 'top bottom', end: 'top top' });
   const leave = ScrollTrigger.create({ trigger: '.outro', start: 'top top', end: 'bottom top' });
-  const covered = ScrollTrigger.create({ trigger: '.profile', start: 'top top', endTrigger: '.outro', end: 'top bottom' });
+  const covered = ScrollTrigger.create({ trigger: '.collection', start: 'top top', endTrigger: '.outro', end: 'top bottom' });
+  const triggers = [hero, story, toAnatomy, anatomy, exit, outro, leave, covered];
 
   const rebuild = () => {
     const w = scene ? scene.size.w || window.innerWidth : window.innerWidth;
@@ -116,5 +117,15 @@ export function initChoreography({ scene, ui, reducedMotion, scrollTo }) {
     scrollTo(y);
   }
 
-  return { evaluate, goToStep, rebuild };
+  // Ana sayfa gizliyken (kategori, ürün, sepet) pinler ve tetikleyiciler kapatılır.
+  function setEnabled(on) {
+    triggers.forEach((t) => (on ? t.enable(false) : t.disable(true)));
+    lastStory = lastStep = lastTheme = -1;
+    if (!on) {
+      document.documentElement.style.setProperty('--theme', 0);
+      document.documentElement.dataset.theme = 'light';
+    }
+  }
+
+  return { evaluate, goToStep, rebuild, setEnabled };
 }

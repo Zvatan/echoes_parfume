@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>ECHOES — Eau de Parfum</title>
+    <meta name="description" content="ECHOES Eau de Parfum. Bir koku geçer, yankısı kalır." />
+    <meta name="theme-color" content="#f5f5f7" />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%22-104%20-104%20208%20208%22%3E%3Crect%20x%3D%22-104%22%20y%3D%22-104%22%20width%3D%22208%22%20height%3D%22208%22%20rx%3D%2240%22%20fill%3D%22%23f3efe7%22%2F%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%231d1d1b%22%3E%3Cpath%20d%3D%22M56.19%20-26.2%20A62%2062%200%201%200%2056.19%2026.2%22%20stroke-width%3D%2210%22%2F%3E%3Cpath%20d%3D%22M42.6%20-19.86%20A47%2047%200%201%200%2042.6%2019.86%22%20stroke-width%3D%224%22%2F%3E%3Cpath%20d%3D%22M-90%200%20H90%22%20stroke-width%3D%225%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles/main.css" />
+  </head>
+  <body class="is-loading">
+    <!-- Amblem: etiket dokusundaki logodan ölçülerek çizildi (dış halka, iç halka, yatay çizgi) -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+      <symbol id="emblem" viewBox="-104 -68 208 136">
+        <path class="em-outer" d="M56.19 -26.2 A62 62 0 1 0 56.19 26.2" fill="none" stroke="currentColor" stroke-width="8" />
+        <path class="em-inner" d="M42.6 -19.86 A47 47 0 1 0 42.6 19.86" fill="none" stroke="currentColor" stroke-width="2.6" />
+        <path class="em-line" d="M-100 0 H100" fill="none" stroke="currentColor" stroke-width="3" />
+      </symbol>
+    </svg>
+
+    <a class="skip-link" href="#icerik">İçeriğe geç</a>
+
+    <!-- Yükleme ekranı -->
+    <div class="loader" aria-hidden="true">
+      <svg class="loader__emblem" viewBox="-104 -68 208 136">
+        <path class="em-outer" d="M56.19 -26.2 A62 62 0 1 0 56.19 26.2" fill="none" stroke="currentColor" stroke-width="8" pathLength="1" />
+        <path class="em-inner" d="M42.6 -19.86 A47 47 0 1 0 42.6 19.86" fill="none" stroke="currentColor" stroke-width="2.6" pathLength="1" />
+        <path class="em-line" d="M-100 0 H100" fill="none" stroke="currentColor" stroke-width="3" pathLength="1" />
+      </svg>
+      <div class="loader__meta">
+        <span class="loader__word">ECHOES</span>
+        <span class="loader__count"><span data-count>0</span>%</span>
+      </div>
+    </div>
+
+    <!-- 3D sahne (sabit arka plan katmanı) -->
+    <div class="stage" aria-hidden="true">
+      <canvas class="stage__canvas"></canvas>
+    </div>
+
+    <header class="nav" data-nav>
+      <nav class="nav__bar" aria-label="Ana menü">
+        <a class="nav__logo" href="#top" aria-label="ECHOES ana sayfa">
+          <svg class="nav__emblem" aria-hidden="true"><use href="#emblem" /></svg>
+        </a>
+        <ul class="nav__links" id="nav-links">
+          <li><a href="#/kadin" data-nav-route="kadin">Kadın Parfümleri</a></li>
+          <li><a href="#/erkek" data-nav-route="erkek">Erkek Parfümleri</a></li>
+          <li><a href="#koleksiyon">Koleksiyon</a></li>
+          <li><a href="#hikaye">Hikâye</a></li>
+          <li><a href="#iletisim">İletişim</a></li>
+        </ul>
+        <div class="nav__actions">
+          <a class="nav__cart" href="#/sepet" data-nav-route="sepet" aria-label="Sepet, boş">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 8h13l-1 12.5h-11z" /><path d="M9 8V6.5a3 3 0 0 1 6 0V8" /></svg>
+            <span class="nav__badge" data-cart-count hidden>0</span>
+          </a>
+          <button class="nav__toggle" type="button" aria-expanded="false" aria-controls="nav-links" aria-label="Menüyü aç">
+            <span></span><span></span>
+          </button>
+        </div>
+      </nav>
+    </header>
+
+    <main id="icerik">
+      <!-- Ana sayfa. Diğer sayfalar (kategori, ürün, sepet) aşağıdaki data-view="page" alanına çizilir. -->
+      <div class="view" data-view="home">
+      <!-- A. Açılış -->
+      <section class="hero" id="top" data-scene="hero">
+        <p class="ribbon">
+          Yeni koleksiyon: kadın ve erkek parfümleri.
+          <a href="#koleksiyon">Koleksiyonu keşfedin <span aria-hidden="true">→</span></a>
+        </p>
+        <div class="hero__head container">
+          <div class="hero__main">
+            <h1 class="hero__title">
+              <span class="sr-only">ECHOES Eau de Parfum</span>
+              <span class="hero__word" aria-hidden="true"><span>E</span><span>C</span><span>H</span><span>O</span><span>E</span><span>S</span></span>
+            </h1>
+            <!-- Parça rafı: referanstaki ürün rafının şişe parçalarına uyarlanmış hali -->
+            <nav class="parts" aria-label="Şişenin parçaları">
+              <ul class="parts__row" data-parts></ul>
+            </nav>
+          </div>
+          <div class="hero__aside">
+            <p class="hero__lede">Bir koku geçer.<br />Yankısı kalır.</p>
+            <a class="link" href="#/kadin">Kadın Parfümleri <span aria-hidden="true">↗</span></a>
+            <a class="link" href="#/erkek">Erkek Parfümleri <span aria-hidden="true">↗</span></a>
+          </div>
+        </div>
+        <figure class="stage-fallback" hidden>
+          <img src="./assets/echoes_label_texture.png" alt="ECHOES Eau de Parfum etiketi" width="1024" height="768" />
+          <figcaption>3D şişe bu cihazda görüntülenemedi; etiket görseli gösteriliyor.</figcaption>
+        </figure>
+        <div class="hero__foot container">
+          <p class="hero__meta">Eau de Parfum</p>
+          <a class="hero__cue" href="#hikaye">
+            <span>Kaydırın</span>
+            <i aria-hidden="true"></i>
+          </a>
+        </div>
+      </section>
+
+      <!-- B. Marka hikâyesi -->
+      <section class="story" id="hikaye" data-scene="story">
+        <div class="story__pin">
+          <div class="container story__inner">
+            <h2 class="headline"><strong>Hikâye.</strong> Geride kalan her şey.</h2>
+            <ol class="story__list" data-story></ol>
+          </div>
+        </div>
+      </section>
+
+      <!-- C. Ürün deneyimi -->
+      <section class="anatomy" id="sise" data-scene="anatomy" data-theme="dark">
+        <div class="anatomy__pin">
+          <div class="container anatomy__inner">
+            <h2 class="headline headline--dark"><strong>Şişe.</strong> Yakından bakın.</h2>
+            <div class="anatomy__captions" data-captions aria-live="polite"></div>
+            <ol class="anatomy__index" data-index aria-label="Adımlar"></ol>
+            <p class="anatomy__hint" aria-hidden="true">Çevirmek için sürükleyin</p>
+            <a class="anatomy__cta" href="#/urun/echo-no-01">Echo No. 01’i inceleyin <span aria-hidden="true">→</span></a>
+          </div>
+        </div>
+      </section>
+
+      <!-- D. Koleksiyon: tüm parfümler + kategori girişleri -->
+      <section class="collection" id="koleksiyon">
+        <div class="container collection__head">
+          <h2 class="headline"><strong>Koleksiyon.</strong> Her biri başka bir yankı.</h2>
+          <div class="collection__controls">
+            <button class="round-btn" type="button" data-prev aria-label="Önceki ürünler">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
+            </button>
+            <button class="round-btn" type="button" data-next aria-label="Sonraki ürünler">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>
+            </button>
+          </div>
+        </div>
+        <div class="rail" data-track aria-label="Tüm parfümler, yatay kaydırılabilir">
+          <ul class="rail__list" data-collection></ul>
+        </div>
+        <div class="container">
+          <ul class="cat-tiles" data-cat-tiles></ul>
+        </div>
+      </section>
+
+      <!-- Döngü: yankı başa döner -->
+      <section class="outro" data-scene="outro">
+        <div class="container outro__inner">
+          <h2 class="outro__title">Her yankı<br />başa döner.</h2>
+        </div>
+        <a class="pill" href="#top" data-to-top>Başa dönün <span aria-hidden="true">↑</span></a>
+      </section>
+      </div>
+
+      <div class="view" data-view="page" hidden></div>
+    </main>
+
+    <!-- E. Footer -->
+    <footer class="footer" id="iletisim">
+      <div class="container">
+        <div class="footer__top">
+          <div class="footer__brand">
+            <svg class="footer__emblem" aria-hidden="true"><use href="#emblem" /></svg>
+            <span class="footer__word">ECHOES</span>
+          </div>
+          <div class="footer__cols">
+            <div>
+              <h3>Alışveriş</h3>
+              <ul>
+                <li><a href="#/kadin">Kadın Parfümleri</a></li>
+                <li><a href="#/erkek">Erkek Parfümleri</a></li>
+                <li><a href="#/sepet">Sepet</a></li>
+                <li><a href="#hikaye">Hikâye</a></li>
+              </ul>
+            </div>
+            <div>
+              <h3>İletişim</h3>
+              <ul data-contact></ul>
+            </div>
+            <div>
+              <h3>Takip edin</h3>
+              <ul data-social></ul>
+            </div>
+          </div>
+        </div>
+        <div class="footer__bottom">
+          <p>© <span data-year></span> ECHOES. Tüm hakları saklıdır.</p>
+          <p>Eau de Parfum</p>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Güvenlik ağı: site kodu hiç çalışamazsa yükleme ekranı takılı kalmasın. -->
+    <script>
+      setTimeout(function () {
+        var loader = document.querySelector('.loader');
+        if (!loader || window.__echoesStarted) return;
+        loader.remove();
+        document.body.classList.remove('is-loading');
+        document.documentElement.classList.remove('is-locked');
+        console.error('[ECHOES] Site kodu başlatılamadı; yükleme ekranı kaldırıldı.');
+      }, 8000);
+    </script>
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>

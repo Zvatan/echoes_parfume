@@ -1,10 +1,20 @@
 import { defineConfig } from 'vite';
+import { copyFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 
-// Derleme çıktısı tek bir HTML dosyasıdır (CSS, JS, 3D model ve görseller gömülü),
-// böylece dist/index.html bir sunucu olmadan, çift tıklanarak açılabilir.
+// Kaynak sayfa: src/index.html (npm run dev bunu sunar).
+// Derleme çıktısı tek bir HTML dosyasıdır (CSS, JS, 3D modeller ve görseller gömülü) ve
+// proje kökündeki index.html olarak da kopyalanır; böylece site sunucu olmadan çift
+// tıklanarak ya da GitHub Pages'te depo kökünden doğrudan açılır.
+const ROOT_INDEX = fileURLToPath(new URL('./index.html', import.meta.url));
+const DIST_INDEX = fileURLToPath(new URL('./dist/index.html', import.meta.url));
+
 export default defineConfig({
+  root: 'src',
   base: './',
   build: {
+    outDir: '../dist',
+    emptyOutDir: true,
     assetsInlineLimit: () => true,
     cssCodeSplit: false,
     modulePreload: false,
@@ -19,14 +29,11 @@ function singleFile() {
     name: 'echoes-single-file',
     apply: 'build',
     enforce: 'post',
-    // Kaynak index.html'deki "dosyadan açıldıysa derlenmiş sürüme git" yönlendirmesi
-    // derlenmiş dosyada gereksizdir.
-    transformIndexHtml: {
-      order: 'pre',
-      handler: (html) => html.replace(/<script data-dev-only>[\s\S]*?<\/script>\s*/, ''),
-    },
     // Vite'ın kendi son işlemleri (ör. dinamik import yardımcıları) bittikten sonra çalışmalı.
     generateBundle: { order: 'post', handler: inlineBundle },
+    closeBundle() {
+      copyFileSync(DIST_INDEX, ROOT_INDEX);
+    },
   };
 }
 

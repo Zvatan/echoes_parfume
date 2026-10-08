@@ -1,13 +1,7 @@
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
-import { toCreasedNormals } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { POSE_KEYS, CAMERA } from './states.js';
-import MODEL_URL from '../assets/echoes_perfume_bottle.glb?url';
-
-// GLB ölçüleri (Z-yukarı): taban z=0.10, kapak tepesi z=2.83, gövde yarıçapı 0.76.
-const BOTTLE_MID = 1.465;
-const BODY_RADIUS = 0.76;
+import { loadModels, makeVariant, BOTTLE_H } from './models.js';
 
 const LIGHT_BG = new THREE.Color('#f5f5f7');
 const DARK_BG = new THREE.Color('#0b0b0b');
@@ -49,10 +43,15 @@ export class BottleScene {
     this.root.add(this.spin);
     this.scene.add(this.root);
     this.shadow = createContactShadow();
+    this.shadow.position.y = -BOTTLE_H / 2 - 0.005;
     this.root.add(this.shadow);
-    // Koyu sahnede stüdyo arka ışığı: cam bunu süzerek amber parlar.
+    // Koyu sahnede stüdyo arka ışığı: cam bunu süzerek parlar.
     this.glow = createBacklight();
     this.scene.add(this.glow);
+
+    this.models = null; // { amber, clear }
+    this.variants = new Map();
+    this.current = null;
 
     this.pose = null; // anlık (sönümlenmiş) poz
     this.target = null; // kaydırmadan gelen hedef poz
@@ -64,86 +63,42 @@ export class BottleScene {
   }
 
   async load(onProgress) {
-    const gltf = await new GLTFLoader().loadAsync(MODEL_URL, (e) => {
-      if (e.total) onProgress?.(e.loaded / e.total);
-    });
-    const model = gltf.scene;
-    // Z-yukarı modeli Y-yukarıya çevir; etiket +Z'ye (kameraya) bakar.
-    model.rotation.x = -Math.PI / 2;
-    model.position.y = -BOTTLE_MID;
-    this.applyMaterials(model);
-    this.spin.add(model);
-    this.shadow.position.y = 0.1 - BOTTLE_MID - 0.005;
+    this.models = await loadModels(this.renderer, onProgress);
+    // Tüm modellerin gölgelendiricilerini önceden derle (ilk geçişte takılma olmasın).
+    this.spin.add(this.models.amber, this.models.clear);
     this.renderer.compile(this.scene, this.camera);
+    this.setModel({ model: 'amber' });
   }
 
-  applyMaterials(model) {
-    const meshes = [];
-    model.traverse((o) => o.isMesh && meshes.push(o));
-
-    for (const mesh of meshes) {
-      const name = mesh.name;
-      if (name.startsWith('Label')) {
-        mesh.geometry = wrapLabel(mesh.geometry);
-        const map = mesh.material.map;
-        map.colorSpace = THREE.SRGBColorSpace;
-        map.anisotropy = this.renderer.capabilities.getMaxAnisotropy();
-        mesh.material = new THREE.MeshStandardMaterial({ map, roughness: 0.62, metalness: 0 });
-        // Etiketin arka yüzü cam içinden görünür: baskısız krem kâğıt.
-        const back = new THREE.Mesh(mesh.geometry, new THREE.MeshStandardMaterial({ color: '#efe8dc', roughness: 0.8, side: THREE.BackSide }));
-        mesh.add(back);
-        continue;
-      }
-
-      // Normal verisi olmayan geometri: keskin kenarları koruyarak normal hesapla.
-      mesh.geometry.deleteAttribute('color');
-      mesh.geometry = toCreasedNormals(mesh.geometry, THREE.MathUtils.degToRad(40));
-
-      if (name.startsWith('Bottle')) {
-        mesh.material = new THREE.MeshPhysicalMaterial({
-          color: '#ffffff',
-          transmission: 1,
-          thickness: 0.6,
-          roughness: 0.03,
-          ior: 1.5,
-          attenuationColor: '#be9158', // modeldeki gövde rengi
-          attenuationDistance: 0.32,
-          specularIntensity: 1,
-          envMapIntensity: 1.1,
-        });
-      } else if (name.startsWith('Perfume')) {
-        mesh.material = new THREE.MeshPhysicalMaterial({
-          color: '#ab6c2b', // modeldeki sıvı rengi
-          roughness: 0.16,
-          clearcoat: 1,
-          clearcoatRoughness: 0.1,
-          emissive: '#4a2208',
-          emissiveIntensity: 0.35,
-        });
-        // Sıvı, camın iç yüzeyine değmesin.
-        mesh.scale.set(0.985, 0.985, 1);
-      } else if (name.startsWith('Collar')) {
-        mesh.material = new THREE.MeshStandardMaterial({ color: '#c9a35a', metalness: 1, roughness: 0.22 });
-      } else if (name.startsWith('Cap')) {
-        mesh.material = new THREE.MeshPhysicalMaterial({
-          color: '#161615',
-          roughness: 0.62,
-          clearcoat: 0.12,
-          clearcoatRoughness: 0.6,
-          envMapIntensity: 0.7,
-        });
-        // Kapak ile boyun camı aynı yarıçapta (0.32) üst üste biniyor; titreşimi önlemek için
-        // kapak radyal olarak çok az genişletildi.
-        mesh.scale.set(1.015, 1.015, 1);
-      }
-    }
+  // visual: { model: 'amber' | 'clear', glass?, liquid? } (bkz. src/data/products.js)
+  resolve(visual) {
+    const key = `${visual.model}|${visual.glass ?? ''}|${visual.liquid ?? ''}`;
+    if (!this.variants.has(key)) this.variants.set(key, makeVariant(this.models[visual.model], visual));
+    return this.variants.get(key);
   }
 
-  setTarget(pose) {
+  setModel(visual) {
+    const next = this.resolve(visual);
+    if (next === this.current && next.parent === this.spin && this.spin.children.length === 1) return;
+    this.spin.clear();
+    this.spin.add(next);
+    this.current = next;
+    this.needsRender = true;
+  }
+
+  // snap: sönümleme olmadan doğrudan uygula (ör. sayfayla birlikte kayan ürün görseli).
+  setTarget(pose, { snap = false } = {}) {
     const t = this.target;
     if (t && POSE_KEYS.every((k) => Math.abs(t[k] - pose[k]) < 1e-5)) return;
     this.target = pose;
-    if (!this.pose) this.pose = { ...pose };
+    if (!this.pose || snap) this.pose = { ...pose };
+    this.needsRender = true;
+  }
+
+  // Yeni bir sayfaya geçerken sönümlemeyi atla (şişe önceki konumdan kaymasın).
+  jumpTo(pose) {
+    this.target = pose;
+    this.pose = { ...pose };
     this.needsRender = true;
   }
 
@@ -157,7 +112,7 @@ export class BottleScene {
   resize() {
     const w = this.canvas.clientWidth;
     const h = this.canvas.clientHeight;
-    if (w === this.size.w && h === this.size.h) return;
+    if (!w || !h || (w === this.size.w && h === this.size.h)) return;
     this.size = { w, h };
     this.renderer.setSize(w, h, false);
     this.camera.aspect = w / h;
@@ -199,10 +154,15 @@ export class BottleScene {
     this.needsRender = false;
   }
 
-  // Belirli bir pozdan kare dışı bir görüntü üretir (parça rafı ve kart görselleri için).
-  snapshot(pose, { size = 320, dark = false } = {}) {
+  // Belirli bir poz ve modelden kare dışı bir görüntü üretir (küçük görseller, ürün kartları).
+  snapshot(pose, { size = 320, dark = false, visual = null } = {}) {
     const prevOffset = { ...this.offset };
+    const prevModel = this.current;
     Object.assign(this.offset, { rx: 0, ry: 0, y: 0, s: 0 });
+    if (visual) {
+      this.spin.clear();
+      this.spin.add(this.resolve(visual));
+    }
 
     this.renderer.setSize(size, size, false);
     this.camera.aspect = 1;
@@ -216,58 +176,20 @@ export class BottleScene {
     const url = out.toDataURL('image/webp', 0.9);
 
     Object.assign(this.offset, prevOffset);
+    if (visual) {
+      this.spin.clear();
+      if (prevModel) this.spin.add(prevModel);
+    }
     this.size = { w: 0, h: 0 };
     this.resize();
+    if (this.pose) this.applyPose(this.pose);
+    this.needsRender = true;
     return url;
   }
 
   dispose() {
     this.renderer.dispose();
   }
-}
-
-// Modeldeki düz etiket, silindirik gövdenin kenarlarında camın dışına taşıyor.
-// Aynı UV'leri koruyarak etiketi gövde yüzeyine sarıyoruz (doku ve logo değişmez).
-function wrapLabel(flat) {
-  const pos = flat.getAttribute('position');
-  const uv = flat.getAttribute('uv');
-  const pts = [];
-  for (let i = 0; i < pos.count; i++) {
-    pts.push({ x: pos.getX(i), z: pos.getZ(i), u: uv.getX(i), v: uv.getY(i) });
-  }
-  const minX = Math.min(...pts.map((p) => p.x));
-  const maxX = Math.max(...pts.map((p) => p.x));
-  const minZ = Math.min(...pts.map((p) => p.z));
-  const maxZ = Math.max(...pts.map((p) => p.z));
-  const corner = (cx, cz) => pts.reduce((a, b) => (Math.hypot(b.x - cx, b.z - cz) < Math.hypot(a.x - cx, a.z - cz) ? b : a));
-  const c00 = corner(minX, minZ);
-  const c10 = corner(maxX, minZ);
-  const c01 = corner(minX, maxZ);
-  const c11 = corner(maxX, maxZ);
-
-  const side = Math.sign(pos.getY(0)) || -1; // etiket düzlemi y=-0.715 → -Y yönüne bakıyor
-  const radius = BODY_RADIUS + 0.006;
-  const width = maxX - minX;
-  const geo = new THREE.PlaneGeometry(width, maxZ - minZ, 48, 1);
-  const gp = geo.getAttribute('position');
-  const guv = geo.getAttribute('uv');
-
-  for (let i = 0; i < gp.count; i++) {
-    const tx = (gp.getX(i) + width / 2) / width;
-    const tz = gp.getY(i) / (maxZ - minZ) + 0.5;
-    // Yay uzunluğu = düz etiketteki x mesafesi; model uzayında gövde ekseni Z, etiket yüzü yönü.
-    const angle = gp.getX(i) / radius;
-    gp.setXYZ(i, radius * Math.sin(angle), side * radius * Math.cos(angle), minZ + tz * (maxZ - minZ));
-    const u = bilerp(c00.u, c10.u, c01.u, c11.u, tx, tz);
-    const v = bilerp(c00.v, c10.v, c01.v, c11.v, tx, tz);
-    guv.setXY(i, u, v);
-  }
-  geo.computeVertexNormals();
-  return geo;
-}
-
-function bilerp(a00, a10, a01, a11, tx, tz) {
-  return (a00 * (1 - tx) + a10 * tx) * (1 - tz) + (a01 * (1 - tx) + a11 * tx) * tz;
 }
 
 function createBacklight() {

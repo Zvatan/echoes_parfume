@@ -88,12 +88,32 @@ function withOutro(visH, states) {
   return states;
 }
 
+// Ürün sayfası: şişeyi ekrandaki bir kutunun (rect, piksel) ortasına, kutuya sığacak
+// ölçekte yerleştirir. Kutu kaydıkça şişe de onunla birlikte kayar.
+export function anchorPose(rect, { width, height, fov, cameraZ }, fill = 0.84) {
+  const visH = 2 * cameraZ * Math.tan((fov * Math.PI) / 360);
+  const visW = visH * (width / height);
+  const s = Math.min((rect.height / height) * visH * fill / BOTTLE_H, (rect.width / width) * visW * fill / 1.7);
+  return {
+    x: ((rect.left + rect.width / 2) / width - 0.5) * visW,
+    y: (0.5 - (rect.top + rect.height / 2) / height) * visH,
+    s,
+    rx: 0.05,
+    ry: -0.45,
+    rz: 0,
+    shadow: 0.9,
+    t: 0,
+  };
+}
+
 // Parça rafı küçük görselleri için kare kadrajlar (görüş alanı = 1:1).
 export function snapshotPoses({ fov, cameraZ }) {
   const visH = 2 * cameraZ * Math.tan((fov * Math.PI) / 360);
   const s0 = (0.84 * visH) / BOTTLE_H;
   const shot = (local, s, rot = {}) => ({ x: 0, y: -local * s, s, rx: 0, ry: 0, rz: 0, shadow: 0.8, t: 0, ...rot });
   return {
+    // Ürün kartları: dikdörtgen şişe biraz daha geniş olduğu için hafifçe küçültülür.
+    product: shot(0, s0 * 0.92, { ry: -0.45, rx: 0.06 }),
     whole: shot(0, s0, { ry: -0.42, rx: 0.06 }),
     turn: shot(0.25, s0 * 1.6, { ry: 1.6 }),
     cap: shot(FOCUS.cap - 0.05, s0 * 3.4, { ry: -0.4, rx: 0.25 }),
