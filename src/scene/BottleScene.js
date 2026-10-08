@@ -3,8 +3,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { toCreasedNormals } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { POSE_KEYS, CAMERA } from './states.js';
-
-const MODEL_URL = '/models/echoes_perfume_bottle.glb';
+import MODEL_URL from '../assets/echoes_perfume_bottle.glb?url';
 
 // GLB ölçüleri (Z-yukarı): taban z=0.10, kapak tepesi z=2.83, gövde yarıçapı 0.76.
 const BOTTLE_MID = 1.465;

@@ -3,6 +3,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
 import 'lenis/dist/lenis.css';
 import { snapshotPoses, CAMERA } from './scene/states.js';
+import labelUrl from './assets/echoes_label_texture.png';
 import { initChoreography } from './scroll/choreography.js';
 import { renderContent } from './ui/content.js';
 import { createLoader } from './ui/loader.js';
@@ -168,7 +169,7 @@ function useFallback() {
   document.documentElement.classList.add('no-webgl');
   document.querySelector('.stage')?.remove();
   document.querySelectorAll('.stage-fallback').forEach((el) => (el.hidden = false));
-  ui.setCardVisual('/images/echoes_label_texture.png', 'ECHOES etiketi');
+  ui.setCardVisual(labelUrl, 'ECHOES etiketi');
 }
 
 function hasWebGL() {

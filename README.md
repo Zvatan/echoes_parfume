@@ -2,21 +2,29 @@
 
 Vite + Three.js + GSAP ScrollTrigger + Lenis.
 
-## Çalıştırma
+## Siteyi açma
+
+**En kolayı:** `index.html` (veya `dist/index.html`) dosyasına çift tıklayın.
+`dist/index.html` her şeyin (CSS, JS, 3D model, görseller) gömülü olduğu tek dosyalık
+sürümdür; sunucu gerektirmez ve tek başına başka bir yere kopyalanabilir. Kök klasördeki
+`index.html` çift tıklanınca otomatik olarak ona yönlenir.
+
+Kodda değişiklik yaptıysanız tek dosyalık sürümü yeniden üretin:
 
 ```bash
-npm install
-npm run dev       # http://localhost:5173
-npm run build     # dist/ klasörüne üretim derlemesi
-npm run preview   # derlemeyi yerelde sunar
+npm install       # yalnızca ilk sefer
+npm run build     # dist/index.html'i yeniden oluşturur
 ```
+
+Geliştirme sırasında anlık önizleme için: `npm run dev` → http://localhost:5173
 
 ## Yapı
 
 ```
 index.html                  Sayfa iskeleti ve amblem (SVG sembolü)
-public/models/              echoes_perfume_bottle.glb (sitede kullanılan model)
-public/images/              echoes_label_texture.png (3D yüklenemezse yedek görsel)
+dist/index.html             Tek dosyalık, çift tıklanarak açılan site (npm run build üretir)
+vite.config.js              Tek dosya derleme ayarı
+src/assets/                 3D model, etiket görseli (3D yüklenemezse yedek), favicon
 src/content.js              TÜM metinler, koku notaları, iletişim ve sosyal bağlantılar
 src/main.js                 Açılış akışı: yükleme → sahne → koreografi → giriş animasyonu
 src/scene/BottleScene.js    Three.js sahnesi, materyaller, ışık, etiket sarma, görsel üretimi
