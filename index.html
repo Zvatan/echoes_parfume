@@ -6,10 +6,12 @@
     <title>ECHOES — Eau de Parfum</title>
     <meta name="description" content="ECHOES Eau de Parfum. Bir koku geçer, yankısı kalır." />
     <meta name="theme-color" content="#f5f5f7" />
-    <!-- Kaynak dosya çift tıklanarak (file://) açılırsa tarayıcı modülleri yükleyemez;
-         tek dosyalık derlenmiş sürüme yönlendir. Derleme sırasında bu betik kaldırılır. -->
+    <!-- Bu kaynak dosya yalnızca Vite geliştirme sunucusunda (npm run dev) çalışır.
+         Çift tıklama, GitHub Pages, Live Server vb. her durumda tek dosyalık derlenmiş
+         sürüme yönlendir. Vite bu sayfaya kendi istemci betiğini ekler; yoksa dev sunucusu
+         değildir. Derleme sırasında bu betik kaldırılır. -->
     <script data-dev-only>
-      if (location.protocol === 'file:') location.replace('dist/index.html');
+      if (!document.querySelector('script[src*="@vite/client"]')) location.replace('dist/index.html');
     </script>
     <link rel="icon" type="image/svg+xml" href="./src/assets/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -187,6 +189,17 @@
       </div>
     </footer>
 
+    <!-- Güvenlik ağı: site kodu hiç çalışamazsa yükleme ekranı takılı kalmasın. -->
+    <script>
+      setTimeout(function () {
+        var loader = document.querySelector('.loader');
+        if (!loader || window.__echoesStarted) return;
+        loader.remove();
+        document.body.classList.remove('is-loading');
+        document.documentElement.classList.remove('is-locked');
+        console.error('[ECHOES] Site kodu başlatılamadı; yükleme ekranı kaldırıldı.');
+      }, 8000);
+    </script>
     <script type="module" src="./src/main.js"></script>
   </body>
 </html>

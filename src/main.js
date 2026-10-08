@@ -10,6 +10,7 @@ import { createLoader } from './ui/loader.js';
 import { initNav } from './ui/nav.js';
 import { initCarousel } from './ui/carousel.js';
 
+window.__echoesStarted = true; // index.html'deki güvenlik ağına kodun çalıştığını bildirir
 gsap.registerPlugin(ScrollTrigger);
 ScrollTrigger.config({ ignoreMobileResize: true });
 
@@ -60,7 +61,15 @@ initNav({
 });
 initCarousel(document.querySelector('.profile'));
 
-boot();
+boot().catch((err) => {
+  // Beklenmedik bir hata olursa bile sayfa açılsın.
+  console.error('[ECHOES] Başlatma hatası:', err);
+  document.querySelector('.loader')?.remove();
+  document.body.classList.remove('is-loading');
+  document.querySelector('.nav__emblem')?.classList.add('is-ready');
+  document.documentElement.classList.remove('is-locked');
+  lenis?.start();
+});
 
 async function boot() {
   const canvas = document.querySelector('.stage__canvas');

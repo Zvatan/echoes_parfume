@@ -7,7 +7,8 @@ Vite + Three.js + GSAP ScrollTrigger + Lenis.
 **En kolayı:** `index.html` (veya `dist/index.html`) dosyasına çift tıklayın.
 `dist/index.html` her şeyin (CSS, JS, 3D model, görseller) gömülü olduğu tek dosyalık
 sürümdür; sunucu gerektirmez ve tek başına başka bir yere kopyalanabilir. Kök klasördeki
-`index.html` çift tıklanınca otomatik olarak ona yönlenir.
+`index.html`, `npm run dev` dışındaki her açılışta (çift tıklama, GitHub Pages, Live Server
+vb.) otomatik olarak ona yönlenir. GitHub Pages'te depo kökünden yayınlamak yeterlidir.
 
 Kodda değişiklik yaptıysanız tek dosyalık sürümü yeniden üretin:
 
