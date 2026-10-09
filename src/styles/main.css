@@ -1,33 +1,8 @@
 /* ==========================================================================
-   ECHOES — tasarım sistemi
-   Referans görselin dili: açık gri zemin, koyu metin, iki tonlu başlıklar,
-   yuvarlak köşeli siyah/beyaz kartlar. Vurgu rengi şişenin amberinden.
+   ECHOES — site stilleri (değişkenler: tokens.css)
    ========================================================================== */
 
-:root {
-  --bg: #f5f5f7;
-  --surface: #ffffff;
-  --ink: #1d1d1f;
-  --ink-2: #6e6e73;
-  --line: #d2d2d7;
-  --dark: #0b0b0b;
-  --dark-ink: #f5f5f7;
-  --dark-ink-2: #a1a1a6;
-  --amber: #9a5b1e; /* metin/bağlantı: #f5f5f7 üzerinde ≈5:1 */
-  --amber-hi: #b4651f; /* küçük büyük harf etiketler (beyaz kart) */
-  --amber-glow: #e3a75f; /* koyu zeminde */
-
-  --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --serif: 'Cormorant Garamond', 'Times New Roman', serif;
-
-  --gutter: clamp(20px, 5.2vw, 100px);
-  --nav-h: 48px;
-  --radius: 18px;
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --theme: 0;
-
-  color-scheme: light;
-}
+@import './tokens.css';
 
 *,
 *::before,
@@ -1722,6 +1697,29 @@ body.is-loading .parts__row {
 
 .notfound .page-lede {
   text-align: left;
+}
+
+/* --- Demo katalog uyarısı (yalnızca panelin demo modunu kullanan tarayıcıda) --- */
+
+.demo-flag {
+  position: fixed;
+  left: 16px;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  z-index: 80;
+  max-width: min(420px, calc(100% - 32px));
+  padding: 10px 14px;
+  border: 1px solid rgb(154 91 30 / 0.35);
+  border-radius: 12px;
+  background: rgb(255 248 238 / 0.96);
+  color: var(--ink);
+  font-size: 12px;
+  line-height: 1.4;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.08);
+}
+
+.demo-flag a {
+  color: var(--amber);
+  font-weight: 600;
 }
 
 /* --- Bildirim --- */

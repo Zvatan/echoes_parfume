@@ -1,4 +1,4 @@
-import { CATEGORIES, byCategory, formatPrice, SAMPLE_DATA } from '../data/products.js';
+import { CATEGORIES, byCategory, formatPrice } from '../data/products.js';
 import { addToCart, remainingStock, qtyInCart, onCartChange } from '../store/cart.js';
 import { href } from '../router.js';
 import { productCard, crumbs, qtyControl, bindQty, sampleNote, esc } from '../ui/components.js';
@@ -10,7 +10,13 @@ export function productPage(product, { has3D }) {
   const p = product;
   const cat = CATEGORIES[p.category];
   const related = byCategory(p.category).filter((r) => r.id !== p.id);
-  const live3D = has3D && !p.visual.placeholder;
+  // Kendi 3D modeli olan ürün (geçici renk varyantı değil) → döndürülebilir model.
+  const live3D = has3D && Boolean(p.visual.model) && !p.visual.placeholder;
+  const caption = p.image
+    ? ''
+    : p.visual.placeholder || !p.visual.model
+      ? 'Geçici ürün görseli'
+      : '3D model bu cihazda görüntülenemiyor';
 
   const media = live3D
     ? `<div class="pdp__media pdp__media--3d" data-anchor data-drag-rotate role="img" aria-label="${esc(p.name)} şişesinin döndürülebilir 3D modeli">
@@ -18,7 +24,7 @@ export function productPage(product, { has3D }) {
        </div>`
     : `<figure class="pdp__media">
          <img src="${productImage(p, 900)}" alt="${esc(p.name)} şişesi" width="900" height="900" />
-         ${p.visual.placeholder ? '<figcaption>Geçici ürün görseli</figcaption>' : '<figcaption>3D model bu cihazda görüntülenemiyor</figcaption>'}
+         ${caption ? `<figcaption>${caption}</figcaption>` : ''}
        </figure>`;
 
   const noteCol = (label, list) => `
@@ -65,7 +71,7 @@ export function productPage(product, { has3D }) {
                 ${noteCol('Dip notaları', p.notes.base)}
               </div>
             </section>
-            ${SAMPLE_DATA ? sampleNote() : ''}
+            ${p.sample ? sampleNote() : ''}
           </div>
         </div>
 

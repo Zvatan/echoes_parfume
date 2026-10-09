@@ -1,4 +1,4 @@
-import { CATEGORIES, formatPrice, SAMPLE_DATA } from '../data/products.js';
+import { CATEGORIES, formatPrice, hasSampleData } from '../data/products.js';
 import { getCart, setQty, removeFromCart, onCartChange } from '../store/cart.js';
 import { href } from '../router.js';
 import { crumbs, qtyControl, bindQty, sampleNote, emblem, esc } from '../ui/components.js';
@@ -88,7 +88,7 @@ function filled(cart) {
         <button type="button" class="btn btn--primary btn--block" disabled aria-describedby="checkout-note">Ödemeye geç</button>
         <p class="summary__note" id="checkout-note">Online ödeme henüz aktif değil. Kargo ücreti ödeme adımında belirlenecek; sepetiniz bu cihazda saklanır.</p>
         <a class="summary__back" href="#koleksiyon">Alışverişe devam et</a>
-        ${SAMPLE_DATA ? sampleNote('Fiyatlar örnektir.') : ''}
+        ${hasSampleData(cart.lines.map((l) => l.product)) ? sampleNote('Fiyatlar örnektir.') : ''}
       </aside>
     </div>`;
 }

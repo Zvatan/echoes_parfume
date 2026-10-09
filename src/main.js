@@ -10,6 +10,8 @@ import { initNav } from './ui/nav.js';
 import { initCarousel } from './ui/carousel.js';
 import { setImageRenderer, productImage } from './ui/images.js';
 import { hideToast } from './ui/toast.js';
+import { loadCatalog } from './data/catalog.js';
+import { reloadCart } from './store/cart.js';
 import { parseRoute } from './router.js';
 import { PRODUCTS, CATEGORIES, byId } from './data/products.js';
 import { categoryPage } from './pages/category.js';
@@ -101,6 +103,11 @@ boot().catch((err) => {
 
 async function boot() {
   const canvas = document.querySelector('.stage__canvas');
+  // Katalog (veritabanı / demo / örnek) 3D sahneyle paralel yüklenir.
+  const catalogReady = loadCatalog().then((info) => {
+    reloadCart();
+    return info;
+  });
 
   try {
     if (!hasWebGL()) throw new Error('WebGL desteklenmiyor');
@@ -115,7 +122,6 @@ async function boot() {
     for (const key of ['whole', 'turn', 'cap', 'collar', 'label']) thumbs[key] = scene.snapshot(shots[key], { size: 240 });
     ui.setThumbs(thumbs);
     setImageRenderer((visual, size) => scene.snapshot(shots.product, { size, visual }));
-    PRODUCTS.forEach((p) => productImage(p, 520)); // kart görselleri yükleme ekranı altında hazırlanır
   } catch (err) {
     console.warn('[ECHOES] 3D sahne yüklenemedi; görsel yedeklere geçildi.', err);
     scene?.dispose();
@@ -123,6 +129,9 @@ async function boot() {
     useFallback();
   }
 
+  const catalog = await catalogReady;
+  if (catalog.source === 'demo') showDemoFlag();
+  if (scene) PRODUCTS.forEach((p) => productImage(p, 520)); // kart görselleri yükleme ekranı altında hazırlanır
   ui.renderCollection();
   await Promise.race([document.fonts.ready, wait(2500)]);
 
@@ -319,6 +328,16 @@ function bindDrag() {
   };
   window.addEventListener('pointerup', end);
   window.addEventListener('pointercancel', end);
+}
+
+// Yönetim paneli demo modunda kullanıldıysa site bu tarayıcıda demo verisini gösterir;
+// bunun gerçek (herkese açık) katalog olmadığı açıkça belirtilir.
+function showDemoFlag() {
+  const adminHref = import.meta.env.DEV ? '/admin/' : 'admin.html';
+  const el = document.createElement('p');
+  el.className = 'demo-flag';
+  el.innerHTML = `Bu tarayıcıda yönetim panelinin <strong>demo</strong> kataloğu gösteriliyor. <a href="${adminHref}">Panele git</a>`;
+  document.body.append(el);
 }
 
 function useFallback() {

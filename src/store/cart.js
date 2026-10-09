@@ -79,6 +79,13 @@ export function removeFromCart(id) {
   write();
 }
 
+// Katalog veritabanından yenilendikten sonra çağrılır: artık satılmayan ürünler düşer,
+// adetler güncel stoka göre kırpılır.
+export function reloadCart() {
+  items = read();
+  listeners.forEach((fn) => fn(getCart()));
+}
+
 export function onCartChange(fn) {
   listeners.add(fn);
   return () => listeners.delete(fn);

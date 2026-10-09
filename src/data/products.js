@@ -1,8 +1,14 @@
-// ECHOES ürün kataloğu — tek merkezi kaynak.
+// ECHOES ürün kataloğu.
 //
-// ÖNEMLİ: Buradaki fiyat, hacim, nota, kalıcılık ve stok değerlerinin TAMAMI ÖRNEKTİR;
-// ticari bilgiler kesinleşince güncelleyin. Sitede ürün sayfalarında bunun örnek veri
-// olduğu belirtilir (SAMPLE_DATA = false yapılınca bu not kalkar).
+// Ürünlerin asıl kaynağı yönetim panelidir (Supabase veritabanı). Bu dosyadaki ÖRNEK katalog:
+//   • Supabase bağlı değilken ya da ulaşılamadığında sitede gösterilir;
+//   • veritabanının başlangıç verisidir (npm run seed → supabase/seed.sql);
+//   • demo modundaki yönetim panelinin başlangıç verisidir.
+// Buradaki fiyat, hacim, nota, kalıcılık ve stok değerlerinin TAMAMI ÖRNEKTİR. Her ürünün
+// "sample" alanı true olduğu sürece sitede "örnek veri" notu gösterilir.
+//
+// Uygulama PRODUCTS ve CATEGORIES'i kullanır; açılışta src/data/catalog.js bunları
+// veritabanındaki güncel kayıtlarla değiştirir.
 //
 // visual.model:
 //   'amber' → src/assets/echoes_perfume_bottle.glb (yuvarlak amber şişe)
@@ -12,10 +18,9 @@
 //   (placeholder: true). Kendi modeli olan ürünlerde (placeholder: false) detay sayfasında
 //   döndürülebilir 3D model gösterilir.
 
-export const SAMPLE_DATA = true;
 export const CURRENCY = 'TRY';
 
-export const CATEGORIES = {
+export const SAMPLE_CATEGORIES = {
   kadin: {
     id: 'kadin',
     title: 'Kadın Parfümleri',
@@ -30,7 +35,7 @@ export const CATEGORIES = {
   },
 };
 
-export const PRODUCTS = [
+const SAMPLE_LIST = [
   // --- Kadın ------------------------------------------------------------------
   {
     id: 'echo-no-01',
@@ -171,6 +176,21 @@ export const PRODUCTS = [
     visual: { model: 'clear', liquid: '#a9c4ae', placeholder: true },
   },
 ];
+
+// Örnek katalog (değişmez kopya)
+export const SAMPLE_PRODUCTS = Object.freeze(SAMPLE_LIST.map((p) => Object.freeze({ ...p, image: null, sample: true, status: 'published' })));
+
+// Uygulamanın kullandığı canlı katalog (catalog.js açılışta günceller)
+export const CATEGORIES = Object.fromEntries(Object.entries(SAMPLE_CATEGORIES).map(([k, c]) => [k, { ...c }]));
+export const PRODUCTS = [...SAMPLE_PRODUCTS];
+
+export function replaceCatalog(categories, products) {
+  for (const k of Object.keys(CATEGORIES)) delete CATEGORIES[k];
+  for (const c of categories) CATEGORIES[c.id] = c;
+  PRODUCTS.splice(0, PRODUCTS.length, ...products.filter((p) => CATEGORIES[p.category]));
+}
+
+export const hasSampleData = (list = PRODUCTS) => list.some((p) => p.sample);
 
 export const byId = (id) => PRODUCTS.find((p) => p.id === id) ?? null;
 export const byCategory = (cat) => PRODUCTS.filter((p) => p.category === cat);

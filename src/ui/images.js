@@ -9,11 +9,13 @@ export function setImageRenderer(fn) {
 }
 
 export function productImage(product, size = 520) {
-  const key = `${product.id}@${size}`;
+  // Yönetim panelinden yüklenmiş gerçek fotoğraf her zaman önceliklidir.
+  if (product.image) return product.image;
+  const key = `${product.id}@${size}@${product.visual.model}${product.visual.glass ?? ''}${product.visual.liquid ?? ''}`;
   if (!cache.has(key)) {
     let url = null;
     try {
-      url = renderer?.(product.visual, size) ?? null;
+      if (product.visual.model) url = renderer?.(product.visual, size) ?? null;
     } catch (err) {
       console.warn('[ECHOES] Ürün görseli üretilemedi:', product.id, err);
     }
@@ -23,7 +25,7 @@ export function productImage(product, size = 520) {
 }
 
 // WebGL olmadan da ürünler ayırt edilebilsin diye şişe biçimi + sıvı rengi.
-function silhouette({ visual }) {
+export function silhouette({ visual }) {
   const liquid = visual.liquid ?? (visual.model === 'amber' ? '#ab6c2b' : '#e0d6b8');
   const glass = visual.model === 'amber' ? visual.glass ?? '#be9158' : '#dfe6ec';
   const body =

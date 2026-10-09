@@ -1,4 +1,4 @@
-import { CATEGORIES, byCategory, SAMPLE_DATA } from '../data/products.js';
+import { CATEGORIES, byCategory, hasSampleData } from '../data/products.js';
 import { href } from '../router.js';
 import { productCard, crumbs, sampleNote, esc } from '../ui/components.js';
 
@@ -41,7 +41,7 @@ export function categoryPage({ id }) {
           </label>
         </div>
         <ul class="pgrid" data-grid></ul>
-        ${SAMPLE_DATA ? sampleNote('Ürün bilgileri ve fiyatlar örnektir.') : ''}
+        ${hasSampleData(products) ? sampleNote('Ürün bilgileri ve fiyatlar örnektir.') : ''}
         <a class="cat__other" href="${href.category(other.id)}">${esc(other.title)} <span aria-hidden="true">→</span></a>
       </div>
     </section>`;
